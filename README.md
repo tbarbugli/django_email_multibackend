@@ -6,6 +6,8 @@ A simple weighted email multi backend for django.
 This packages allows you to use multiple email backends and distribute the emails with configurable weights.
 
 Settings:
+=========
+
 
 **EMAIL\_BACKENDS**  
 A dictonary that defines the available backends

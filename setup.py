@@ -98,7 +98,7 @@ excluded_directories = standard_exclude_directories
 package_data = find_package_data(exclude_directories=excluded_directories)
 
 CLASSIFIERS = [
-    'Development Status :: 5 - Production/Stable'
+    'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
     'License :: OSI Approved :: GNU General Public License (GPL)',
     'Natural Language :: English',
