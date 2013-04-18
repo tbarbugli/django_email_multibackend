@@ -1,6 +1,8 @@
 Django Email Multibackend
 =========================
 
+[![Build Status](https://travis-ci.org/tbarbugli/django_email_multibackend.png?cache=0)](https://travis-ci.org/tbarbugli/django_email_multibackend)
+
 A simple weighted email multi backend for django.
 
 This packages allows you to use multiple email backends and distribute the emails with configurable weights.

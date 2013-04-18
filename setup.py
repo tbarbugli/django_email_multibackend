@@ -129,6 +129,7 @@ setup(
     tests_require=[
         'django',
         'pytest',
+        'unittest2',
     ],
     test_suite='runtests.runtests',
 )
