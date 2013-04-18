@@ -56,9 +56,4 @@ class EmailMultiServerBackend(BaseEmailBackend):
 
     def send_messages(self, email_messages):
         backend = self.get_backend()
-        self._lock.acquire()
-        try:
-            num_sent = backend.send_messages(email_messages)
-        finally:
-            self._lock.release()
-        return num_sent
+        return backend.send_messages(email_messages)
