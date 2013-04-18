@@ -1,4 +1,8 @@
-import unittest
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
+
 from django_email_multibackend.backends import EmailMultiServerBackend
 from django.core.mail.backends.base import BaseEmailBackend
 from django.conf import settings
