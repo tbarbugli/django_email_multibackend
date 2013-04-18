@@ -20,3 +20,5 @@ EMAIL_BACKENDS = {
 EMAIL_BACKENDS_WEIGHTS = (
     ('mailjet', 5), ('mailchimp', 3)
 )
+
+SECRET_KEY = 'just_because_django_needs_this'
