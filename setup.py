@@ -127,7 +127,7 @@ setup(
     description=DESCRIPTION,
     classifiers=CLASSIFIERS,
     tests_require=[
-        'django',
+        'django<=1.4',
         'pytest',
         'unittest2',
     ],
