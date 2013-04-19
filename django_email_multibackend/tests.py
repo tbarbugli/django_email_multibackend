@@ -47,8 +47,7 @@ class TestMultiBackendEmail(unittest.TestCase):
     def test_send_messages(self):
         instance = EmailMultiServerBackend()
         for i in range(10):
-            with self.assertRaises((SendMailException, )):
-                instance.send_messages(None)
+            self.assertRaises(SendMailException, instance.send_messages, None)
 
     def test_backend_classes(self):
         instance = EmailMultiServerBackend()
