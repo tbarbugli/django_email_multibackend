@@ -11,7 +11,7 @@ if 'DJANGO_SETTINGS_MODULE' not in os.environ:
 def runtests(args=None):
     import pytest
     sys.path.append(test_dir)
-    result = pytest.main(['django_email_multibackend/tests.py'])
+    result = pytest.main(['django_email_multibackend'])
     sys.exit(result)
 
 
