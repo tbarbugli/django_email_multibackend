@@ -18,6 +18,34 @@ class MatchAll(BaseCondition):
     def check(self, message):
         return True
 
+class MatchAny(BaseCondition):
+    """
+    >>> mail = EmailMessage()
+
+    >>> mail.extra_headers['X-CAMPAIGN-NAME'] = 'weekly-mail'
+
+    >>> MatchAny(\
+    ('django_email_multibackend.conditions.FilterMailByHeader', {'header': ('X-CAMPAIGN-NAME', 'daily-mail')}),\
+    ('django_email_multibackend.conditions.FilterMailByHeader', {'header': ('X-CAMPAIGN-NAME', 'weekly-mail')})\
+    )(mail)
+    True
+    """
+    def __init__(self, *conditions):
+        from django_email_multibackend.backends import load_class
+        self.conditions = []
+        for condition in conditions:
+            try:
+                kls_name, params = condition
+            except ValueError:
+                kls_name, params = condition[0], {}
+            self.conditions.append(load_class(kls_name)(**params))
+
+    def check(self, message):
+        for condition in self.conditions:
+            if condition(message):
+                return True
+        return False
+
 class FilterMailByHeader(BaseCondition):
     """
     Filter emails by headers
