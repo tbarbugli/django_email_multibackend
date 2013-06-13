@@ -25,12 +25,14 @@ class MatchAny(BaseCondition):
     >>> mail.extra_headers['X-CAMPAIGN-NAME'] = 'weekly-mail'
 
     >>> MatchAny(\
-    ('django_email_multibackend.conditions.FilterMailByHeader', {'header': ('X-CAMPAIGN-NAME', 'daily-mail')}),\
+    conditions=(('django_email_multibackend.conditions.FilterMailByHeader', {'header': ('X-CAMPAIGN-NAME', 'daily-mail')}),\
     ('django_email_multibackend.conditions.FilterMailByHeader', {'header': ('X-CAMPAIGN-NAME', 'weekly-mail')})\
-    )(mail)
+    ))(mail)
     True
+
     """
-    def __init__(self, *conditions):
+
+    def __init__(self, conditions):
         from django_email_multibackend.backends import load_class
         self.conditions = []
         for condition in conditions:
