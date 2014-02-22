@@ -94,3 +94,7 @@ or just use py.test directly
 ` DJANGO_SETTINGS_MODULE='django_email_multibackend.test_settings' py.test django_email_multibackend `
 
 Every build of the project is built on Travis CI against python 2.5 / 2.6 / 2.7
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/tbarbugli/django_email_multibackend/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
