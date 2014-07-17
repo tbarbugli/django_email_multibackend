@@ -3,7 +3,7 @@ try:
 except ImportError:
     import unittest
 
-from django_email_multibackend.backends import EmailMultiServerBackend
+from django_email_multibackend.backends import EmailMultiServerBackend, weighted_choice_by_val
 from django.core.mail import EmailMessage
 from django.core.mail.backends.base import BaseEmailBackend
 from django.conf import settings
@@ -125,6 +125,24 @@ class TestMultiBackendEmail(unittest.TestCase):
         instance = EmailMultiServerBackend(backends=test_backends, backend_weights=test_weights)
         messages = [EmailMessage(), EmailMessage()]
         self.assertEquals(0, instance.send_messages(messages))
+
+class TestWeightedChoice(unittest.TestCase):
+    def test_low_limit(self):
+        first = ('A', 5)
+        second = ('B', 5)
+        self.assertEquals('A', weighted_choice_by_val([first, second], 0.0))
+
+    def test_high_limit(self):
+        first = ('A', 5)
+        second = ('B', 5)
+        self.assertEquals('B', weighted_choice_by_val([first, second], 1.0))
+
+    def test_boundary(self):
+        first = ('A', 5)
+        second = ('B', 5)
+        self.assertEquals('B', weighted_choice_by_val([first, second], 0.5))
+
+
 
 
 class TestConditions(unittest.TestCase):

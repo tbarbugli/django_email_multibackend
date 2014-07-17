@@ -7,16 +7,18 @@ from django_email_multibackend import conf
 from django.utils.importlib import import_module
 
 
-def weighted_choice(choices):
+def weighted_choice_by_val(choices, random_value):
     values, weights = zip(*choices)
-    total = 0
-    cum_weights = []
-    for w in weights:
-        total += w
-        cum_weights.append(total)
-    x = random() * total
-    i = bisect(cum_weights, x)
-    return values[i]
+    rnd = random_value * sum(weights)
+    for i, w in enumerate(weights):
+        rnd -= w
+        if rnd < 0:
+            return values[i]
+    return values[-1]
+
+def weighted_choice(choices):
+    random_value = random()
+    return weighted_choice_by_val(choices, random_value)
 
 def get_backend_routing_conditions(backend):
     """
