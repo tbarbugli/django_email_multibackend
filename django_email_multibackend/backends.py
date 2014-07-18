@@ -1,5 +1,4 @@
 from random import random
-from bisect import bisect
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail.backends.base import BaseEmailBackend
 from django.core.mail import get_connection
@@ -64,7 +63,7 @@ def load_class(path):
     try:
         mod_name, klass_name = path.rsplit('.', 1)
         mod = import_module(mod_name)
-    except ImportError, e:
+    except ImportError as e:
         raise ImproperlyConfigured(('Error importing email backend module %s: "%s"'
                                     % (mod_name, e)))
     try:
@@ -90,7 +89,7 @@ class EmailMultiServerBackend(BaseEmailBackend):
         if kwargs or any(not_supported_params):
             raise TypeError('You cant initialise this backend with %r' % not_supported_params)
 
-        for backend_key, backend_settings in backends.iteritems():
+        for backend_key, backend_settings in backends.items():
             backend_settings['fail_silently'] = fail_silently
             self.servers[backend_key] = get_connection(**backend_settings)
 

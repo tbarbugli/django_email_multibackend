@@ -59,7 +59,7 @@ class TestMultiBackendEmail(unittest.TestCase):
         instance = EmailMultiServerBackend()
         backends = dict.fromkeys(['b1', 'b2'])
         weights = instance.backends_weights(None, backends)
-        self.assertListEqual(list(zip(*weights)[0]), backends.keys())
+        self.assertEqual(set([('b1', 1), ('b2', 1)]), set(weights))
 
     def test_weights(self):
         instance = EmailMultiServerBackend()
@@ -125,6 +125,23 @@ class TestMultiBackendEmail(unittest.TestCase):
         instance = EmailMultiServerBackend(backends=test_backends, backend_weights=test_weights)
         messages = [EmailMessage(), EmailMessage()]
         self.assertEquals(0, instance.send_messages(messages))
+
+    def test_multi_backend_sent_count(self):
+        test_backends = {
+            'mailjet': {
+                'backend': 'django_email_multibackend.tests.FakeSendingBackend',
+                },
+            'mailjet2': {
+                'backend': 'django_email_multibackend.tests.FakeSendingBackend',
+                },
+            }
+
+        test_weights = (
+            ('mailjet', 1),('mailjet2', 1),
+        )
+        instance = EmailMultiServerBackend(backends=test_backends, backend_weights=test_weights)
+        messages = [EmailMessage(), EmailMessage(), EmailMessage(), EmailMessage()]
+        self.assertEquals(4, instance.send_messages(messages))
 
 class TestWeightedChoice(unittest.TestCase):
     def test_low_limit(self):
