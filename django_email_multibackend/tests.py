@@ -3,7 +3,7 @@ try:
 except ImportError:
     import unittest
 
-from django_email_multibackend.backends import EmailMultiServerBackend
+from django_email_multibackend.backends import EmailMultiServerBackend, weighted_choice_by_val
 from django.core.mail import EmailMessage
 from django.core.mail.backends.base import BaseEmailBackend
 from django.conf import settings
@@ -27,6 +27,18 @@ class FakeCampaignMailBackend(BaseEmailBackend):
     def send_messages(self, email_messages):
         raise SentCampaignException()
 
+class FakeSendingBackend(BaseEmailBackend):
+    def send_messages(self, email_messages):
+        if not email_messages:
+            return
+        if not hasattr(email_messages, '__iter__'):
+            email_messages = [email_messages]
+        return len(email_messages)
+
+class NoConnectionBackend(BaseEmailBackend):
+    def send_messages(self, email_messages):
+        return
+        # Replicates django smtp.py behaviour
 
 transactional_email = EmailMessage(
     'password reset', '', to=['tbarbugli@gmail.com']
@@ -71,6 +83,67 @@ class TestMultiBackendEmail(unittest.TestCase):
         instance = EmailMultiServerBackend()
         for backend_name, backend in instance.servers.items():
             assert isinstance(backend, (FakeTransactionalMailBackend, FakeCampaignMailBackend))
+
+    def test_sent_count(self):
+        test_backends = {
+            'mailjet': {
+                'backend': 'django_email_multibackend.tests.FakeSendingBackend',
+                },
+            }
+
+        test_weights = (
+            ('mailjet', 1),
+        )
+        instance = EmailMultiServerBackend(backends=test_backends, backend_weights=test_weights)
+        messages = [EmailMessage(), EmailMessage()]
+        self.assertEquals(2, instance.send_messages(messages))
+
+    def test_empty_sent_count(self):
+        test_backends = {
+            'mailjet': {
+                'backend': 'django_email_multibackend.tests.FakeSendingBackend',
+                },
+            }
+
+        test_weights = (
+            ('mailjet', 1),
+        )
+        instance = EmailMultiServerBackend(backends=test_backends, backend_weights=test_weights)
+        messages = []
+        self.assertEquals(0, instance.send_messages(messages))
+
+    def test_connection_error_count(self):
+        test_backends = {
+            'mailjet': {
+                'backend': 'django_email_multibackend.tests.NoConnectionBackend',
+                },
+            }
+
+        test_weights = (
+            ('mailjet', 1),
+        )
+        instance = EmailMultiServerBackend(backends=test_backends, backend_weights=test_weights)
+        messages = [EmailMessage(), EmailMessage()]
+        self.assertEquals(0, instance.send_messages(messages))
+
+class TestWeightedChoice(unittest.TestCase):
+    def test_low_limit(self):
+        first = ('A', 5)
+        second = ('B', 5)
+        self.assertEquals('A', weighted_choice_by_val([first, second], 0.0))
+
+    def test_high_limit(self):
+        first = ('A', 5)
+        second = ('B', 5)
+        self.assertEquals('B', weighted_choice_by_val([first, second], 1.0))
+
+    def test_boundary(self):
+        first = ('A', 5)
+        second = ('B', 5)
+        self.assertEquals('B', weighted_choice_by_val([first, second], 0.5))
+
+
+
 
 class TestConditions(unittest.TestCase):
 

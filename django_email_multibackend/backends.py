@@ -7,16 +7,18 @@ from django_email_multibackend import conf
 from django.utils.importlib import import_module
 
 
-def weighted_choice(choices):
+def weighted_choice_by_val(choices, random_value):
     values, weights = zip(*choices)
-    total = 0
-    cum_weights = []
-    for w in weights:
-        total += w
-        cum_weights.append(total)
-    x = random() * total
-    i = bisect(cum_weights, x)
-    return values[i]
+    rnd = random_value * sum(weights)
+    for i, w in enumerate(weights):
+        rnd -= w
+        if rnd < 0:
+            return values[i]
+    return values[-1]
+
+def weighted_choice(choices):
+    random_value = random()
+    return weighted_choice_by_val(choices, random_value)
 
 def get_backend_routing_conditions(backend):
     """
@@ -75,11 +77,12 @@ def load_class(path):
 class EmailMultiServerBackend(BaseEmailBackend):
 
     def __init__(self, host=None, port=None, username=None, password=None,
-                 use_tls=None, fail_silently=False, **kwargs):
+                 use_tls=None, fail_silently=False, backends=conf.EMAIL_BACKENDS,
+                 backend_weights=conf.EMAIL_BACKENDS_WEIGHTS, **kwargs):
 
         self.servers = {}
         self.weights = self.backends_weights(
-            conf.EMAIL_BACKENDS_WEIGHTS, conf.EMAIL_BACKENDS
+            backend_weights, backends
         )
 
         not_supported_params = (host, port, username, password, use_tls)
@@ -87,7 +90,7 @@ class EmailMultiServerBackend(BaseEmailBackend):
         if kwargs or any(not_supported_params):
             raise TypeError('You cant initialise this backend with %r' % not_supported_params)
 
-        for backend_key, backend_settings in conf.EMAIL_BACKENDS.iteritems():
+        for backend_key, backend_settings in backends.iteritems():
             backend_settings['fail_silently'] = fail_silently
             self.servers[backend_key] = get_connection(**backend_settings)
 
@@ -123,5 +126,7 @@ class EmailMultiServerBackend(BaseEmailBackend):
 
         for email in email_messages:
             backend = self.get_backend(email)
-            send_count += backend.send_messages(email_messages)
+            count = backend.send_messages(email)
+            if count:
+                send_count += count
         return send_count
