@@ -126,7 +126,7 @@ class EmailMultiServerBackend(BaseEmailBackend):
 
         for email in email_messages:
             backend = self.get_backend(email)
-            count = backend.send_messages(email)
+            count = backend.send_messages([email, ])
             if count:
                 send_count += count
         return send_count
