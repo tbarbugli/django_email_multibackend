@@ -13,42 +13,55 @@ from django_email_multibackend.conditions import MatchAll
 class SendMailException(Exception):
     pass
 
+
 class SentTransactionEmailException(SendMailException):
     pass
+
 
 class SentCampaignException(SendMailException):
     pass
 
-class FakeTransactionalMailBackend(BaseEmailBackend):
+
+class BackendAssertionsMixin(object):
+    """
+    Assert a few basic facts about inputs to backends
+    """
     def send_messages(self, email_messages):
+        if email_messages and not hasattr(email_messages, '__iter__'):
+            # In every case i've seen, it is not ok to pass a non-iteratable to send_messages
+            raise TypeError("send_messages requires an iterable")
+
+
+class FakeTransactionalMailBackend(BackendAssertionsMixin, BaseEmailBackend):
+    def send_messages(self, email_messages):
+        super(FakeTransactionalMailBackend, self).send_messages(email_messages)
         raise SentTransactionEmailException()
 
-class FakeCampaignMailBackend(BaseEmailBackend):
+
+class FakeCampaignMailBackend(BackendAssertionsMixin, BaseEmailBackend):
     def send_messages(self, email_messages):
+        super(FakeCampaignMailBackend, self).send_messages(email_messages)
         raise SentCampaignException()
 
-class FakeSendingBackend(BaseEmailBackend):
-    def send_messages(self, email_messages):
-        if not email_messages:
-            return
-        if not hasattr(email_messages, '__iter__'):
-            email_messages = [email_messages]
-        return len(email_messages)
 
-class NoConnectionBackend(BaseEmailBackend):
+class FakeSendingBackend(BackendAssertionsMixin, BaseEmailBackend):
     def send_messages(self, email_messages):
-        return
+        super(FakeSendingBackend, self).send_messages(email_messages)
+        if email_messages:
+            return len(email_messages)
+
+
+class NoConnectionBackend(BackendAssertionsMixin, BaseEmailBackend):
+    def send_messages(self, email_messages):
+        super(NoConnectionBackend, self).send_messages(email_messages)
         # Replicates django smtp.py behaviour
 
-transactional_email = EmailMessage(
-    'password reset', '', to=['tbarbugli@gmail.com']
-)
+transactional_email = EmailMessage('password reset', to=['tbarbugli@gmail.com'])
 transactional_email.extra_headers['X-MAIL-TYPE'] = 'transactional'
 
-campaign_email = EmailMessage(
-    'buy this', '', to=['tbarbugli@gmail.com']
-)
+campaign_email = EmailMessage('buy this', to=['tbarbugli@gmail.com'])
 campaign_email.extra_headers['X-MAIL-TYPE'] = 'non-transactional'
+
 
 class TestMultiBackendEmail(unittest.TestCase):
 
@@ -126,6 +139,7 @@ class TestMultiBackendEmail(unittest.TestCase):
         messages = [EmailMessage(), EmailMessage()]
         self.assertEquals(0, instance.send_messages(messages))
 
+
 class TestWeightedChoice(unittest.TestCase):
     def test_low_limit(self):
         first = ('A', 5)
@@ -141,8 +155,6 @@ class TestWeightedChoice(unittest.TestCase):
         first = ('A', 5)
         second = ('B', 5)
         self.assertEquals('B', weighted_choice_by_val([first, second], 0.5))
-
-
 
 
 class TestConditions(unittest.TestCase):
