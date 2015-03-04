@@ -55,7 +55,7 @@ Example settings:
         },
     }
 
-    EMAIL_BACKENDS\_WEIGHTS = (
+    EMAIL_BACKENDS_WEIGHTS = (
         ('mailjet', 7), ('mandarill', 3)
     )
 
