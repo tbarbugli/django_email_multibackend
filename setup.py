@@ -127,9 +127,8 @@ setup(
     description=DESCRIPTION,
     classifiers=CLASSIFIERS,
     tests_require=[
-        'django==1.4.5',
+        'django==1.5',
         'pytest',
-        'unittest2',
     ],
     test_suite='runtests.runtests',
 )
