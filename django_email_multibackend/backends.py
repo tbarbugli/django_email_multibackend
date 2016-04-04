@@ -3,7 +3,11 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.mail.backends.base import BaseEmailBackend
 from django.core.mail import get_connection
 from django_email_multibackend import conf
-from django.utils.importlib import import_module
+
+try:
+    from django.utils.importlib import import_module
+except ImportError:
+    from importlib import import_module
 
 
 def weighted_choice_by_val(choices, random_value):
@@ -24,7 +28,7 @@ def get_backend_routing_conditions(backend):
     Loads and initialise the list of conditions for :backend
 
 
-    eg. 
+    eg.
 
     EMAIL_BACKENDS_CONDITIONS = {
         'mailjet': [
