@@ -119,7 +119,7 @@ A django package to handle multiple email backends and distribute the messages w
 setup(
     name='django_email_multibackend',
     version=__version__,
-    url='http://github.com/tbarbugli/django-email-multibackend',
+    url='https://github.com/tbarbugli/django_email_multibackend',
     author=__maintainer__,
     author_email=__email__,
     license='BSD',
